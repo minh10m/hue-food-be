@@ -1,6 +1,5 @@
-package com.minh.Online.Food.Ordering.repository;
+package com.minh.Online.Food.Ordering.modules.restaurant;
 
-import com.minh.Online.Food.Ordering.model.Restaurant;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -15,4 +14,11 @@ public interface RestaurantRepository extends JpaRepository<Restaurant, Long> {
     List<Restaurant> findBySearchQuery(String query);
 
     Restaurant findByOwnerId(Long userId);
+
+    @Query("""
+  select r from Restaurant r
+  left join fetch r.owner
+  left join fetch r.address""")
+    List<Restaurant> findAllWithOwnerAndAddress();
+
 }
