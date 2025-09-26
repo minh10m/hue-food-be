@@ -1,14 +1,14 @@
-package com.minh.Online.Food.Ordering.service;
+package com.minh.Online.Food.Ordering.modules.order.service;
 
-import com.minh.Online.Food.Ordering.model.Order;
-import com.minh.Online.Food.Ordering.model.User;
-import com.minh.Online.Food.Ordering.request.OrderRequest;
+import com.minh.Online.Food.Ordering.modules.order.dto.OrderRequest;
+import com.minh.Online.Food.Ordering.modules.order.model.Order;
+import com.minh.Online.Food.Ordering.modules.user.User;
 
 import java.util.List;
 
 public interface OrderService {
 
-    public Order createOrder(OrderRequest req, User user) throws Exception;
+    public Long createOrder(OrderRequest req, User user) throws Exception;
 
     public Order updateOrder(Long orderId, String orderStatus) throws Exception;
 

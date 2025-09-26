@@ -1,6 +1,9 @@
-package com.minh.Online.Food.Ordering.model;
+package com.minh.Online.Food.Ordering.modules.order.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.minh.Online.Food.Ordering.modules.address.Address;
+import com.minh.Online.Food.Ordering.modules.restaurant.Restaurant;
+import com.minh.Online.Food.Ordering.modules.user.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -33,7 +36,6 @@ public class Order {
 
     private Date createAt;
 
-
     @ManyToOne
     private Address deliveryAddress;
 
@@ -43,6 +45,4 @@ public class Order {
     private int totalItem;
 
     private Long totalPrice;
-
-
 }
