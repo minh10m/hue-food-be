@@ -1,4 +1,4 @@
-package com.minh.Online.Food.Ordering.response;
+package com.minh.Online.Food.Ordering.modules.user.dto;
 
 import lombok.Data;
 
