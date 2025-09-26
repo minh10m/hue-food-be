@@ -1,4 +1,4 @@
-package com.minh.Online.Food.Ordering.model;
+package com.minh.Online.Food.Ordering.modules.user;
 
 public enum USER_ROLE {
     ROLE_CUSTOMER,
