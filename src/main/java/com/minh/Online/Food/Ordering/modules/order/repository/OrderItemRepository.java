@@ -1,6 +1,6 @@
-package com.minh.Online.Food.Ordering.repository;
+package com.minh.Online.Food.Ordering.modules.order.repository;
 
-import com.minh.Online.Food.Ordering.model.OrderItem;
+import com.minh.Online.Food.Ordering.modules.order.model.OrderItem;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
