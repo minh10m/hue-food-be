@@ -1,4 +1,4 @@
-package com.minh.Online.Food.Ordering.dto;
+package com.minh.Online.Food.Ordering.modules.restaurant.dto;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
@@ -13,7 +13,7 @@ public class RestaurantDto {
     private String title;
 
     @Column(length = 1000)
-    private List<String> images;
+    private String image;
 
     private String description;
     private Long id;

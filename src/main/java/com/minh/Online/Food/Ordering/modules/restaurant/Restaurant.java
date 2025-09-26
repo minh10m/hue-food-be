@@ -1,13 +1,18 @@
-package com.minh.Online.Food.Ordering.model;
+package com.minh.Online.Food.Ordering.modules.restaurant;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.minh.Online.Food.Ordering.modules.address.Address;
+import com.minh.Online.Food.Ordering.modules.address.dto.ContactInformation;
+import com.minh.Online.Food.Ordering.modules.user.User;
+import com.minh.Online.Food.Ordering.modules.food.model.Food;
+import com.minh.Online.Food.Ordering.modules.order.model.Order;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,7 +25,8 @@ public class Restaurant {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @OneToOne
+    @JsonIgnore
+    @ManyToOne
     private User owner;
 
     private String name;
@@ -41,20 +47,15 @@ public class Restaurant {
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Order> orders = new ArrayList<>();
 
-    @ElementCollection
     @Column(length = 1000)
-    private List<String> images;
+    private String image;
 
-    private LocalDateTime registrationDate;
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDate registrationDate;
 
     private boolean open;
 
     @JsonIgnore
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
     private List<Food> foods = new ArrayList<>();
-
-
-
-
-
 }

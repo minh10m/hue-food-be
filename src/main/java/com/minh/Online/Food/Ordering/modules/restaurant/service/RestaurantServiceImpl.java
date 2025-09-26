@@ -1,22 +1,23 @@
-package com.minh.Online.Food.Ordering.service;
+package com.minh.Online.Food.Ordering.modules.restaurant.service;
 
-import com.minh.Online.Food.Ordering.dto.RestaurantDto;
-import com.minh.Online.Food.Ordering.model.Address;
-import com.minh.Online.Food.Ordering.model.Restaurant;
-import com.minh.Online.Food.Ordering.model.User;
-import com.minh.Online.Food.Ordering.repository.AddressRepository;
-import com.minh.Online.Food.Ordering.repository.RestaurantRepository;
-import com.minh.Online.Food.Ordering.repository.UserRepository;
-import com.minh.Online.Food.Ordering.request.CreateRestaurantRequest;
+import com.minh.Online.Food.Ordering.modules.address.Address;
+import com.minh.Online.Food.Ordering.modules.restaurant.dto.RestaurantResponse;
+import com.minh.Online.Food.Ordering.modules.restaurant.RestaurantRepository;
+import com.minh.Online.Food.Ordering.modules.restaurant.dto.CreateRestaurantRequest;
+import com.minh.Online.Food.Ordering.modules.restaurant.dto.RestaurantDto;
+import com.minh.Online.Food.Ordering.modules.restaurant.Restaurant;
+import com.minh.Online.Food.Ordering.modules.user.User;
+import com.minh.Online.Food.Ordering.modules.address.AddressRepository;
+import com.minh.Online.Food.Ordering.modules.user.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
 @Service
-public class RestaurantServiceImpl implements RestaurantService{
+public class RestaurantServiceImpl implements RestaurantService {
 
     @Autowired
     private RestaurantRepository restaurantRepository;
@@ -36,10 +37,10 @@ public class RestaurantServiceImpl implements RestaurantService{
         restaurant.setAddress(address);
         restaurant.setCuisineType(req.getCuisineType());
         restaurant.setDescription(req.getDescription());
-        restaurant.setImages(req.getImages());
+        restaurant.setImage(req.getImage());
         restaurant.setName(req.getName());
         restaurant.setOpeningHours(req.getOpeningHours());
-        restaurant.setRegistrationDate(LocalDateTime.now());
+        restaurant.setRegistrationDate(LocalDate.now());
         restaurant.setOwner(user);
 
         return restaurantRepository.save(restaurant);
@@ -69,9 +70,25 @@ public class RestaurantServiceImpl implements RestaurantService{
     }
 
     @Override
-    public List<Restaurant> getAllRestaurants() {
-        return restaurantRepository.findAll();
+    public List<RestaurantResponse> getAllRestaurantsDto() {
+        List<Restaurant> list = restaurantRepository.findAllWithOwnerAndAddress();
+        return list.stream().map(r -> RestaurantResponse.builder()
+                .id(r.getId())
+                .name(r.getName())
+                .description(r.getDescription())
+                .cuisineType(r.getCuisineType())
+                .openingHours(r.getOpeningHours())
+                .image(r.getImage())
+                .open(r.isOpen())
+                .ownerId(r.getOwner() != null ? r.getOwner().getId() : null)
+                .ownerName(r.getOwner() != null ? r.getOwner().getFullName() : null)
+                .addressId(r.getAddress() != null ? r.getAddress().getId() : null)
+                .street(r.getAddress() != null ? r.getAddress().getStreet() : null)
+                .city(r.getAddress() != null ? r.getAddress().getCity() : null)
+                .build()
+        ).toList();
     }
+
 
     @Override
     public List<Restaurant> searchRestaurant(String keyWord) {
@@ -103,7 +120,7 @@ public class RestaurantServiceImpl implements RestaurantService{
 
         RestaurantDto restaurantDto = new RestaurantDto();
         restaurantDto.setDescription(restaurant.getDescription());
-        restaurantDto.setImages(restaurant.getImages());
+        restaurantDto.setImage(restaurant.getImage());
         restaurantDto.setTitle(restaurant.getName());
         restaurantDto.setId(restaurantId);
 
