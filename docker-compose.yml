@@ -1,0 +1,35 @@
+services:
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+
+  # Optional: RedisInsight để quan sát cache trong giao diện web
+  redisinsight:
+    image: redis/redisinsight:latest
+    ports:
+      - "5540:5540"
+    depends_on:
+      - redis
+
+  # Optional: nếu muốn chạy Spring Boot trong Docker luôn
+  app:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATA_REDIS_HOST: redis     # quan trọng: dùng tên service
+      SPRING_DATA_REDIS_PORT: "6379"
+      # Các biến khác của bạn:
+      FRONTEND_URL: ${FRONTEND_URL}
+      DATASOURCE_URL: ${DATASOURCE_URL}
+      DATASOURCE_USER: ${DATASOURCE_USER}
+      DATASOURCE_PASSWORD: ${DATASOURCE_PASSWORD}
+    depends_on:
+      - redis
+
+volumes:
+  redis-data:
