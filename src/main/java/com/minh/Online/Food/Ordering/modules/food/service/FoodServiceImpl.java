@@ -1,9 +1,9 @@
 package com.minh.Online.Food.Ordering.modules.food.service;
 
-import com.minh.Online.Food.Ordering.modules.category.model.Category;
+import com.minh.Online.Food.Ordering.modules.category.Category;
 import com.minh.Online.Food.Ordering.modules.food.dto.CreateFoodRequest;
-import com.minh.Online.Food.Ordering.modules.food.model.Food;
-import com.minh.Online.Food.Ordering.modules.food.repository.FoodRepository;
+import com.minh.Online.Food.Ordering.modules.food.Food;
+import com.minh.Online.Food.Ordering.modules.food.FoodRepository;
 import com.minh.Online.Food.Ordering.modules.restaurant.Restaurant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
