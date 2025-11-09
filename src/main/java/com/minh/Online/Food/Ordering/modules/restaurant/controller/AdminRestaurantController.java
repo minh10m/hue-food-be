@@ -4,11 +4,16 @@ import com.minh.Online.Food.Ordering.modules.restaurant.service.RestaurantServic
 import com.minh.Online.Food.Ordering.modules.restaurant.dto.CreateRestaurantRequest;
 import com.minh.Online.Food.Ordering.modules.restaurant.Restaurant;
 import com.minh.Online.Food.Ordering.modules.user.User;
+import com.minh.Online.Food.Ordering.modules.user.UserRepository;
 import com.minh.Online.Food.Ordering.modules.user.dto.MessageResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
 
@@ -18,105 +23,159 @@ public class AdminRestaurantController {
 
     @Autowired
     private RestaurantService restaurantService;
+    
+    @Autowired
+    private UserRepository userRepository;
+    
+    private User getAuthenticatedUser(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new RuntimeException("User not authenticated");
+        }
+        
+        if (authentication.getPrincipal() instanceof User) {
+            return (User) authentication.getPrincipal();
+        }
+        
+        // Fallback to database lookup if principal is not User
+        String username = authentication.getName();
+        return userRepository.findByEmail(username)
+                .orElseThrow(() -> new RuntimeException("User not found with email: " + username));
+    }
 
 
+    @Operation(summary = "Create restaurant", description = "Creates a new restaurant")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "201", description = "Successfully created restaurant"),
+        @ApiResponse(responseCode = "400", description = "Invalid input"),
+        @ApiResponse(responseCode = "401", description = "User not authenticated"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @SecurityRequirement(name = "bearerAuth")
     @PostMapping()
     public ResponseEntity<?> createRestaurant(
             @Valid @RequestBody CreateRestaurantRequest req,
-            @AuthenticationPrincipal User user) {
+            Authentication authentication) {
         try {
-            if (user == null) {
-                return new ResponseEntity<>("User not authenticated", HttpStatus.UNAUTHORIZED);
-            }
+            User user = getAuthenticatedUser(authentication);
             
             if (req == null || req.getAddress() == null) {
-                return new ResponseEntity<>("Restaurant address is required", HttpStatus.BAD_REQUEST);
+                return ResponseEntity.badRequest().body("Restaurant address is required");
             }
 
             Restaurant restaurant = restaurantService.createRestaurant(req, user);
-            return new ResponseEntity<>(restaurant, HttpStatus.CREATED);
+            return ResponseEntity.status(HttpStatus.CREATED).body(restaurant);
             
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         } catch (Exception e) {
-            return new ResponseEntity<>("Error creating restaurant: " + e.getMessage(), 
-                                     HttpStatus.INTERNAL_SERVER_ERROR);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error creating restaurant: " + e.getMessage());
         }
     }
 
+    @Operation(summary = "Update restaurant", description = "Updates an existing restaurant")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Successfully updated restaurant"),
+        @ApiResponse(responseCode = "400", description = "Invalid input"),
+        @ApiResponse(responseCode = "401", description = "User not authenticated"),
+        @ApiResponse(responseCode = "404", description = "Restaurant not found"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @SecurityRequirement(name = "bearerAuth")
     @PutMapping("/{id}")
     public ResponseEntity<?> updateRestaurant(
             @Valid @RequestBody CreateRestaurantRequest req,
-            @AuthenticationPrincipal User user,
+            Authentication authentication,
             @PathVariable Long id) {
         try {
-            if (user == null) {
-                return new ResponseEntity<>("User not authenticated", HttpStatus.UNAUTHORIZED);
-            }
-
+            getAuthenticatedUser(authentication);
             Restaurant restaurant = restaurantService.updateRestaurant(id, req);
-            return new ResponseEntity<>(restaurant, HttpStatus.OK);
+            return ResponseEntity.ok(restaurant);
             
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         } catch (Exception e) {
-            return new ResponseEntity<>("Error updating restaurant: " + e.getMessage(), 
-                                     HttpStatus.INTERNAL_SERVER_ERROR);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error updating restaurant: " + e.getMessage());
         }
     }
 
+    @Operation(summary = "Delete restaurant", description = "Deletes an existing restaurant")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Successfully deleted restaurant"),
+        @ApiResponse(responseCode = "401", description = "User not authenticated"),
+        @ApiResponse(responseCode = "404", description = "Restaurant not found"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @SecurityRequirement(name = "bearerAuth")
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteRestaurant(
-            @AuthenticationPrincipal User user,
+            Authentication authentication,
             @PathVariable Long id) {
         try {
-            if (user == null) {
-                return new ResponseEntity<>("User not authenticated", HttpStatus.UNAUTHORIZED);
-            }
-
+            getAuthenticatedUser(authentication);
             restaurantService.deleteRestaurant(id);
+            
             MessageResponse message = new MessageResponse();
             message.setMessage("Restaurant deleted successfully");
-            return new ResponseEntity<>(message, HttpStatus.OK);
+            return ResponseEntity.ok(message);
             
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         } catch (Exception e) {
-            return new ResponseEntity<>("Error deleting restaurant: " + e.getMessage(), 
-                                     HttpStatus.INTERNAL_SERVER_ERROR);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error deleting restaurant: " + e.getMessage());
         }
     }
 
+    @Operation(summary = "Update restaurant status", description = "Toggles the active status of a restaurant")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Successfully updated restaurant status"),
+        @ApiResponse(responseCode = "401", description = "User not authenticated"),
+        @ApiResponse(responseCode = "404", description = "Restaurant not found"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @SecurityRequirement(name = "bearerAuth")
     @PutMapping("/{id}/status")
     public ResponseEntity<?> updateRestaurantStatus(
-            @AuthenticationPrincipal User user,
+            Authentication authentication,
             @PathVariable Long id) {
         try {
-            if (user == null) {
-                return new ResponseEntity<>("User not authenticated", HttpStatus.UNAUTHORIZED);
-            }
-
+            getAuthenticatedUser(authentication);
             Restaurant restaurant = restaurantService.updateRestaurantStatus(id);
-            return new ResponseEntity<>(restaurant, HttpStatus.OK);
+            return ResponseEntity.ok(restaurant);
             
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         } catch (Exception e) {
-            return new ResponseEntity<>("Error updating restaurant status: " + e.getMessage(), 
-                                     HttpStatus.INTERNAL_SERVER_ERROR);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error updating restaurant status: " + e.getMessage());
         }
     }
 
-    @GetMapping("/user")
-    public ResponseEntity<?> findRestaurantByUserId(
-            @AuthenticationPrincipal User user) {
+    @Operation(summary = "Find restaurant by ID", description = "Retrieves a restaurant by its ID")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Successfully retrieved restaurant"),
+        @ApiResponse(responseCode = "401", description = "User not authenticated"),
+        @ApiResponse(responseCode = "404", description = "Restaurant not found"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @SecurityRequirement(name = "bearerAuth")
+    @GetMapping("/restaurant/{id}")
+    public ResponseEntity<?> findRestaurantById(
+            Authentication authentication,
+            @PathVariable Long id) {
         try {
-            if (user == null) {
-                return new ResponseEntity<>("User not authenticated", HttpStatus.UNAUTHORIZED);
-            }
-
-            Restaurant restaurant = restaurantService.getRestaurantByUserId(user.getId());
-            if (restaurant == null) {
-                return new ResponseEntity<>("Restaurant not found for this user", HttpStatus.NOT_FOUND);
-            }
-
-            return new ResponseEntity<>(restaurant, HttpStatus.OK);
+            getAuthenticatedUser(authentication);
+            Restaurant restaurant = restaurantService.findRestaurantById(id);
+            return ResponseEntity.ok(restaurant);
             
         } catch (Exception e) {
-            return new ResponseEntity<>("Error finding restaurant: " + e.getMessage(), 
-                                     HttpStatus.INTERNAL_SERVER_ERROR);
+            if (e.getMessage().contains("not found") || e.getMessage().contains("Restaurant")) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+            }
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error finding restaurant: " + e.getMessage());
         }
     }
 }
