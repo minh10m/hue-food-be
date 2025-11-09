@@ -1,4 +1,4 @@
-package com.minh.Online.Food.Ordering.modules.ingredient.controller;
+package com.minh.Online.Food.Ordering.modules.ingredient;
 
 import com.minh.Online.Food.Ordering.modules.ingredient.dto.IngredientCategoryRequest;
 import com.minh.Online.Food.Ordering.modules.ingredient.dto.IngredientRequest;
