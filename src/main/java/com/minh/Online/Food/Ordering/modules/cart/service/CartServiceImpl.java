@@ -5,7 +5,7 @@ import com.minh.Online.Food.Ordering.modules.cart.model.Cart;
 import com.minh.Online.Food.Ordering.modules.cart.model.CartItem;
 import com.minh.Online.Food.Ordering.modules.cart.repository.CartItemRepository;
 import com.minh.Online.Food.Ordering.modules.cart.repository.CartRepository;
-import com.minh.Online.Food.Ordering.modules.food.model.Food;
+import com.minh.Online.Food.Ordering.modules.food.Food;
 import com.minh.Online.Food.Ordering.modules.user.User;
 import com.minh.Online.Food.Ordering.modules.food.service.FoodService;
 import com.minh.Online.Food.Ordering.modules.user.service.UserService;
