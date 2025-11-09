@@ -5,7 +5,7 @@ import com.minh.Online.Food.Ordering.modules.ingredient.model.IngredientsItem;
 import com.minh.Online.Food.Ordering.modules.ingredient.repository.IngredientCategoryRepository;
 import com.minh.Online.Food.Ordering.modules.ingredient.repository.IngredientItemRepository;
 import com.minh.Online.Food.Ordering.modules.restaurant.Restaurant;
-import com.minh.Online.Food.Ordering.modules.category.repository.CategoryRepository;
+import com.minh.Online.Food.Ordering.modules.category.CategoryRepository;
 import com.minh.Online.Food.Ordering.modules.restaurant.service.RestaurantService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
