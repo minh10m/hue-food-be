@@ -36,7 +36,6 @@ public class RestaurantController {
         return ResponseEntity.ok(restaurantService.getAllRestaurantsDto());
     }
 
-
     @GetMapping("/{id}")
     public ResponseEntity<?> findRestaurantById(
             @PathVariable Long id) {
@@ -64,18 +63,19 @@ public class RestaurantController {
     }
 
     @PutMapping("/{id}/add-favorites")
-    public ResponseEntity<?> addToFavorites(
-            Authentication authentication,
-            @PathVariable Long id) {
+    public ResponseEntity<?> addToFavorites(Authentication authentication, @PathVariable Long id) {
         try {
             User user = getAuthenticatedUser(authentication);
-            RestaurantDto restaurant = restaurantService.addToFavorites(id, user);
+            RestaurantDto restaurant = restaurantService.addToFavorites(id, user.getId());
             return ResponseEntity.ok(restaurant);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
+        } catch (org.springframework.security.access.AccessDeniedException | org.springframework.security.core.AuthenticationException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error adding to favorites: " + e.getMessage());
         }
     }
+
 }

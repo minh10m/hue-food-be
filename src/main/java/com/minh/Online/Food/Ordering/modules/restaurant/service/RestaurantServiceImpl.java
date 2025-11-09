@@ -115,35 +115,31 @@ public class RestaurantServiceImpl implements RestaurantService {
     }
 
     @Override
-    public RestaurantDto addToFavorites(Long restaurantId, User user) throws Exception {
-        Restaurant restaurant = findRestaurantById(restaurantId);
+    public RestaurantDto addToFavorites(Long restaurantId, Long userId) {
+        User user = userRepository.findByIdWithFavorites(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-        RestaurantDto restaurantDto = new RestaurantDto();
-        restaurantDto.setDescription(restaurant.getDescription());
-        restaurantDto.setImage(restaurant.getImage());
-        restaurantDto.setTitle(restaurant.getName());
-        restaurantDto.setId(restaurantId);
+        Restaurant restaurant = restaurantRepository.findById(restaurantId)
+                .orElseThrow(() -> new IllegalArgumentException("Restaurant not found"));
 
-        boolean isFavorites = false;
-        List<RestaurantDto> favorites = user.getFavorites();
-        for (RestaurantDto favorite : favorites) {
-            if (favorite.getId().equals(restaurantId)) {
-                isFavorites = true;
-                break;
-            }
+        // toggle
+        if (user.getFavorites().contains(restaurant)) {
+            user.getFavorites().remove(restaurant);
+        } else {
+            user.getFavorites().add(restaurant);
         }
 
-        if (isFavorites) {
-            favorites.removeIf(favorite -> favorite.getId().equals(restaurantId));
-        }
-        else {
-            favorites.add(restaurantDto);
-        }
-
+        // save not strictly necessary if within persistence context, but ok:
         userRepository.save(user);
-        return restaurantDto;
-    }
 
+        // map to DTO to return
+        RestaurantDto dto = new RestaurantDto();
+        dto.setId(restaurant.getId());
+        dto.setTitle(restaurant.getName());
+        dto.setImage(restaurant.getImage());
+        dto.setDescription(restaurant.getDescription());
+        return dto;
+    }
 
     @Override
     public Restaurant updateRestaurantStatus(Long restaurantId) throws Exception {

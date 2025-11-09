@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.minh.Online.Food.Ordering.modules.address.Address;
 import com.minh.Online.Food.Ordering.modules.address.dto.ContactInformation;
 import com.minh.Online.Food.Ordering.modules.user.User;
-import com.minh.Online.Food.Ordering.modules.food.model.Food;
+import com.minh.Online.Food.Ordering.modules.food.Food;
 import com.minh.Online.Food.Ordering.modules.order.model.Order;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -15,6 +15,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Data
 @Entity
@@ -58,4 +59,7 @@ public class Restaurant {
     @JsonIgnore
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
     private List<Food> foods = new ArrayList<>();
+
+    @Override public boolean equals(Object o){ if(this==o) return true; if(!(o instanceof Restaurant r)) return false; return id!=null && id.equals(r.id); }
+    @Override public int hashCode(){ return Objects.hashCode(id); }
 }
