@@ -1,6 +1,6 @@
 package com.minh.Online.Food.Ordering.modules.category.service;
 
-import com.minh.Online.Food.Ordering.modules.category.model.Category;
+import com.minh.Online.Food.Ordering.modules.category.Category;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

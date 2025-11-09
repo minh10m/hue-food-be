@@ -1,4 +1,4 @@
-package com.minh.Online.Food.Ordering.modules.category.model;
+package com.minh.Online.Food.Ordering.modules.category;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.minh.Online.Food.Ordering.modules.restaurant.Restaurant;
