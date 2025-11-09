@@ -3,6 +3,7 @@ package com.minh.Online.Food.Ordering.modules.user;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.minh.Online.Food.Ordering.modules.forgot_password.ForgotPassword;
+import com.minh.Online.Food.Ordering.modules.restaurant.Restaurant;
 import com.minh.Online.Food.Ordering.modules.restaurant.dto.RestaurantDto;
 import com.minh.Online.Food.Ordering.modules.address.Address;
 import com.minh.Online.Food.Ordering.modules.order.model.Order;
@@ -72,8 +73,13 @@ public class User implements UserDetails {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "customer")
     private List<Order> orders = new ArrayList<>();
 
-    @ElementCollection
-    private List<RestaurantDto> favorites = new ArrayList<>();
+    @ManyToMany
+    @JoinTable(
+            name = "user_favorites",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "restaurant_id")
+    )
+    private Set<Restaurant> favorites = new HashSet<>();
 
     @JsonIgnore
     @OneToMany(
@@ -85,4 +91,7 @@ public class User implements UserDetails {
 
     @OneToOne(mappedBy = "user")
     private ForgotPassword forgotPassword;
+
+    @Override public boolean equals(Object o){ if(this==o) return true; if(!(o instanceof User u)) return false; return id!=null && id.equals(u.id); }
+    @Override public int hashCode(){ return Objects.hashCode(id); }
 }
