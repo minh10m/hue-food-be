@@ -7,42 +7,53 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
-import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.List;
 
-@Configuration
+@Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
-    private final UserDetailsService userDetailsService;
+    private final CustomerUserDetailsService userDetailsService;
 
-    private static final List<String> WHITELIST = List.of(
-            "/v3/api-docs",
-            "/v3/api-docs/",
-            "/v3/api-docs/swagger-config",
-            "/swagger-ui",
-            "/swagger-ui/",
-            "/swagger-ui.html",
-            "/swagger-ui/**",
-            "/swagger-resources/**",
-            "/configuration/**",
-            "/webjars/**",
-            "/forgot-password/**",
-            "/api/restaurants/**"
-    );
+    private static final AntPathMatcher ANT = new AntPathMatcher();
 
     public JwtAuthenticationFilter(JwtService jwtService, CustomerUserDetailsService userDetailsService) {
         this.jwtService = jwtService;
         this.userDetailsService = userDetailsService;
+    }
+
+    /** Public (no-auth) endpoints.
+     *  NOTE: do NOT put /api/restaurants/** here. Only GET is public (handled in SecurityConfig).
+     */
+    private boolean isPublicPath(String path) {
+        return ANT.match("/v3/api-docs/**", path)
+                || ANT.match("/swagger-ui/**", path)
+                || ANT.match("/swagger-ui.html", path)
+                || ANT.match("/swagger-resources/**", path)
+                || ANT.match("/configuration/**", path)
+                || ANT.match("/webjars/**", path)
+                || ANT.match("/login/**", path)
+                || ANT.match("/register/**", path)
+                || ANT.match("/refresh_token/**", path)
+                || ANT.match("/forgot-password/**", path)
+                || ANT.match("/error", path)
+                || ANT.match("/actuator/**", path)
+                || ANT.match("/public/**", path);
+    }
+
+    /** Skip filtering for public paths and CORS preflight. */
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        return "OPTIONS".equalsIgnoreCase(request.getMethod())
+                || isPublicPath(request.getServletPath());
     }
 
     @Override
@@ -52,56 +63,36 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             @NonNull FilterChain filterChain)
             throws ServletException, IOException {
 
-        try {
-            String path = request.getRequestURI();
-
-            // Skip JWT processing for whitelisted paths
-            if (WHITELIST.stream().anyMatch(path::startsWith)) {
-                filterChain.doFilter(request, response);
-                return;
-            }
-
+        // Only handle if no auth yet and we have a Bearer token
+        if (SecurityContextHolder.getContext().getAuthentication() == null) {
             String authHeader = request.getHeader("Authorization");
-
-            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-                logger.warn("Missing or invalid Authorization header");
-                SecurityContextHolder.clearContext();
-                filterChain.doFilter(request, response);
-                return;
-            }
-
-            String token = authHeader.substring(7);
-            String email = jwtService.extractEmail(token);
-
-            if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                String token = authHeader.substring(7);
+                String email = null;
                 try {
-                    UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+                    email = jwtService.extractEmail(token);
+                } catch (Exception ignored) {
+                    // optionally log invalid token format/claims
+                }
 
-                    if (jwtService.isValid(token, userDetails)) {
-                        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                                userDetails, null, userDetails.getAuthorities()
-                        );
-
-                        authToken.setDetails(
-                                new WebAuthenticationDetailsSource().buildDetails(request)
-                        );
-
-                        SecurityContextHolder.getContext().setAuthentication(authToken);
-                    } else {
-                        logger.warn("Invalid JWT token for user: " + email);
-                        SecurityContextHolder.clearContext();
+                if (email != null) {
+                    try {
+                        UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+                        if (jwtService.isValid(token, userDetails)) {
+                            UsernamePasswordAuthenticationToken authToken =
+                                    new UsernamePasswordAuthenticationToken(
+                                            userDetails, null, userDetails.getAuthorities());
+                            authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                            SecurityContextHolder.getContext().setAuthentication(authToken);
+                        }
+                    } catch (Exception ignored) {
+                        // optionally log loadUserByUsername errors
                     }
-                } catch (Exception e) {
-                    logger.error("Cannot set user authentication: ", e);
-                    SecurityContextHolder.clearContext();
                 }
             }
-            
-            filterChain.doFilter(request, response);
-            
-        } finally {
-            // Clear the security context after the request is processed
-            SecurityContextHolder.clearContext();
         }
+
+        filterChain.doFilter(request, response);
+        // Do not clear the context here.
     }
 }
