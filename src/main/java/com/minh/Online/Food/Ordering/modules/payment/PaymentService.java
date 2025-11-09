@@ -1,7 +1,6 @@
-package com.minh.Online.Food.Ordering.modules.payment.service;
+package com.minh.Online.Food.Ordering.modules.payment;
 
 import com.minh.Online.Food.Ordering.modules.order.model.Order;
-import com.minh.Online.Food.Ordering.modules.payment.dto.PaymentResponse;
 import com.stripe.Stripe;
 import com.stripe.exception.StripeException;
 import com.stripe.model.checkout.Session;
