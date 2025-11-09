@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -46,38 +47,34 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .authorizeHttpRequests(
-                        req->req.requestMatchers(
-                                "/login/**",
-                                "/register/**",
-                                "/refresh_token/**",
-                                "/forgot-password/**",
-                                "/api/restaurants/**",
-                                // Swagger UI v3 (OpenAPI)
-                                "/v3/api-docs/**",
-                                "/swagger-ui/**",
-                                "/swagger-ui.html",
-                                "/swagger-resources/**",
-                                "/webjars/**"
-                                )
-                                .permitAll()
-                                .requestMatchers("/admin/**").hasAuthority("ADMIN")
-                                .anyRequest()
-                                .authenticated()
-                ).userDetailsService(userDetailsServiceImp)
-                .sessionManagement(session->session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(req -> req
+                        // Public
+                        .requestMatchers("/login/**", "/register/**", "/refresh_token/**", "/forgot-password/**").permitAll()
+                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/swagger-resources/**", "/webjars/**").permitAll()
+
+                        // Chỉ GET của restaurants là public
+                        .requestMatchers(HttpMethod.GET, "/api/restaurants/**").permitAll()
+
+                        // Admin (chú ý thêm dấu / đầu và dùng hasRole hoặc hasAuthority cho đúng prefix)
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN") // tương đương hasAuthority("ROLE_ADMIN")
+
+                        // OPTIONS cho preflight CORS
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
+                        // Còn lại bắt buộc đăng nhập
+                        .anyRequest().authenticated()
+                )
+                .userDetailsService(userDetailsServiceImp)
+                .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-                .exceptionHandling(
-                        e->e.accessDeniedHandler(
-                                        (request, response, accessDeniedException)->response.setStatus(403)
-                                )
-                                .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
-                .logout(l->l
+                .exceptionHandling(e -> e
+                        .accessDeniedHandler((req1, res, ex) -> res.setStatus(403))
+                        .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
+                )
+                .logout(l -> l
                         .logoutUrl("/logout")
                         .addLogoutHandler(logoutHandler)
                         .logoutSuccessHandler((request, response, authentication) -> {
@@ -88,7 +85,6 @@ public class SecurityConfig {
                         })
                 )
                 .build();
-
     }
 
     @Bean
