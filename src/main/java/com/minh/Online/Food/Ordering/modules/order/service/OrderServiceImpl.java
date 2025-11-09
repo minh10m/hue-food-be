@@ -98,13 +98,13 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public Order updateOrder(Long orderId, String orderStatus) throws Exception {
-
-        Order order = findOrderById(orderId);
+        Order order = findOrderById(orderId)
+                .orElseThrow(() -> new Exception("Order not found with id: " + orderId));
 
         if (orderStatus.equals("OUT_FOR_DELIVERY")
                 || orderStatus.equals("DELIVERED")
                 || orderStatus.equals("COMPLETED")
-                ||orderStatus.equals("PENDING")){
+                || orderStatus.equals("PENDING")) {
             order.setOrderStatus(orderStatus);
             return orderRepository.save(order);
         }
@@ -114,9 +114,9 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public void cancelOrder(Long orderId) throws Exception {
-        Order order = findOrderById(orderId);
+        findOrderById(orderId)
+            .orElseThrow(() -> new Exception("Order not found with id: " + orderId));
         orderRepository.deleteById(orderId);
-
     }
 
     @Override
@@ -135,13 +135,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public Order findOrderById(Long orderId) throws Exception {
-
-        Optional<Order> optionalOrder = orderRepository.findById(orderId);
-
-        if (optionalOrder.isEmpty()){
-            throw new Exception("order not found");
-        }
-        return optionalOrder.get();
+    public Optional<Order> findOrderById(Long orderId) throws Exception {
+        return orderRepository.findById(orderId);
     }
 }

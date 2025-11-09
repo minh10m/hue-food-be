@@ -1,6 +1,6 @@
 package com.minh.Online.Food.Ordering.modules.order.model;
 
-import com.minh.Online.Food.Ordering.modules.food.model.Food;
+import com.minh.Online.Food.Ordering.modules.food.Food;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
