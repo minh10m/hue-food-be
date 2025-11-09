@@ -1,8 +1,8 @@
-package com.minh.Online.Food.Ordering.modules.food.model;
+package com.minh.Online.Food.Ordering.modules.food;
 
 import com.minh.Online.Food.Ordering.modules.ingredient.model.IngredientsItem;
 import com.minh.Online.Food.Ordering.modules.restaurant.Restaurant;
-import com.minh.Online.Food.Ordering.modules.category.model.Category;
+import com.minh.Online.Food.Ordering.modules.category.Category;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
