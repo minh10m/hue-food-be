@@ -58,8 +58,7 @@ public class SecurityConfig {
                         // Chỉ GET của restaurants là public
                         .requestMatchers(HttpMethod.GET, "/api/restaurants/**").permitAll()
 
-                        // Admin (chú ý thêm dấu / đầu và dùng hasRole hoặc hasAuthority cho đúng prefix)
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN") // tương đương hasAuthority("ROLE_ADMIN")
+                        .requestMatchers("/api/admin/**").hasRole("RESTAURANT_OWNER")
 
                         // OPTIONS cho preflight CORS
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()

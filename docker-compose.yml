@@ -23,11 +23,14 @@ services:
     environment:
       SPRING_DATA_REDIS_HOST: redis     # quan trọng: dùng tên service
       SPRING_DATA_REDIS_PORT: "6379"
-      # Các biến khác của bạn:
-      FRONTEND_URL: ${FRONTEND_URL}
       DATASOURCE_URL: ${DATASOURCE_URL}
       DATASOURCE_USER: ${DATASOURCE_USER}
       DATASOURCE_PASSWORD: ${DATASOURCE_PASSWORD}
+      FRONTEND_URL: ${FRONTEND_URL}
+      MAIL_USERNAME: ${MAIL_USERNAME}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      STRIPE_API_KEY: ${STRIPE_API_KEY}
     depends_on:
       - redis
 

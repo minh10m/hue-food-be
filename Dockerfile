@@ -1,29 +1,34 @@
 # Build stage
-FROM maven:3.8.4-openjdk-17 AS build
-
+FROM maven:3.8.4-eclipse-temurin-17 AS build
 WORKDIR /app
 
-# Copy pom.xml và tải dependencies
+# copy pom and download deps (offline)
 COPY pom.xml .
-RUN mvn dependency:go-offline
+RUN mvn dependency:go-offline -B
 
-# Copy toàn bộ source code và build ứng dụng
+# copy sources and build
 COPY src ./src
-RUN mvn clean package -DskipTests
+RUN mvn clean package -DskipTests -B
 
-# Runtime stage
-FROM openjdk:17-jdk-slim
-
+# Runtime stage (dùng Temurin OpenJDK 17)
+FROM eclipse-temurin:17-jdk-jammy
 WORKDIR /app
 
-# Copy file JAR từ build stage
-COPY --from=build /app/target/Back-end-0.0.1-SNAPSHOT.jar .
+# Optional: tạo user không phải root
+RUN addgroup --system app && adduser --system --ingroup app app
+USER app
 
-# Thiết lập biến môi trường
-ENV APP_PORT=8080
+# Copy jar (ghi đè tên file thành app.jar để an toàn)
+COPY --from=build --chown=app:app /app/target/*.jar /app/app.jar
 
-# Expose port
-EXPOSE $APP_PORT
+# ENV / port
+ARG APP_PORT=8080
+ENV APP_PORT=${APP_PORT}
+EXPOSE ${APP_PORT}
 
-# Lệnh khởi chạy ứng dụng
-CMD ["java", "-jar", "/app/Back-end-0.0.1-SNAPSHOT.jar"]
+# Healthcheck (tùy chọn)
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s \
+  CMD curl -f http://localhost:${APP_PORT}/actuator/health || exit 1
+
+# Run
+ENTRYPOINT ["java","-jar","/app/app.jar"]
