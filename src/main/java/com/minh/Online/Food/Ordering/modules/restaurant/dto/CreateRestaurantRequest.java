@@ -22,5 +22,4 @@ public class CreateRestaurantRequest {
 
     private String image;
 
-
 }

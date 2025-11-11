@@ -1,8 +1,10 @@
 package com.minh.Online.Food.Ordering.modules.category;
 
+import com.minh.Online.Food.Ordering.modules.category.dto.CreateCategoryRequest;
 import com.minh.Online.Food.Ordering.modules.category.service.CategoryService;
 import com.minh.Online.Food.Ordering.modules.user.User;
 import com.minh.Online.Food.Ordering.modules.user.UserRepository;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -40,28 +42,26 @@ public class CategoryController {
 
     @PostMapping("/admin/category")
     public ResponseEntity<?> createCategory(
-            @RequestBody Category category) {
-        
+            @Valid @RequestBody CreateCategoryRequest req
+    ) {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             User user = getAuthenticatedUser(authentication);
 
-            Category createdCategory = categoryService.createCategory(category.getName(), user.getId());
-            return new ResponseEntity<>(createdCategory, HttpStatus.CREATED);
+            Category createdCategory = categoryService.createCategory(req.getName(), req.getRestaurantId(), user);
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(createdCategory);
         } catch (Exception e) {
             String errorMessage = e.getMessage();
             if (errorMessage != null && errorMessage.contains("Restaurant was not found")) {
-                return new ResponseEntity<>(
-                    Map.of("error", "You need to create a restaurant before creating categories"),
-                    HttpStatus.BAD_REQUEST
-                );
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(Map.of("error", "You need to create a restaurant before creating categories"));
             }
-            return new ResponseEntity<>(
-                Map.of("error", "Error creating category: " + errorMessage),
-                HttpStatus.INTERNAL_SERVER_ERROR
-            );
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Error creating category: " + errorMessage));
         }
     }
+
 
     @GetMapping("/category/restaurant/{id}")
     public ResponseEntity<List<Category>> getRestaurantCategory(

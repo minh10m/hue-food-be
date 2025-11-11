@@ -3,7 +3,9 @@ package com.minh.Online.Food.Ordering.modules.category.service;
 import com.minh.Online.Food.Ordering.modules.category.Category;
 import com.minh.Online.Food.Ordering.modules.category.CategoryRepository;
 import com.minh.Online.Food.Ordering.modules.restaurant.Restaurant;
+import com.minh.Online.Food.Ordering.modules.restaurant.RestaurantRepository;
 import com.minh.Online.Food.Ordering.modules.restaurant.service.RestaurantService;
+import com.minh.Online.Food.Ordering.modules.user.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,16 +22,26 @@ public class CategoryServiceImpl implements CategoryService {
     @Autowired
     private CategoryRepository categoryRepository;
 
-    @Override
-    public Category createCategory(String name, Long userId) throws Exception {
+    @Autowired
+    private RestaurantRepository restaurantRepository;
 
-        Restaurant restaurant =  restaurantService.getRestaurantByUserId(userId);
+    @Override
+    public Category createCategory(String name, Long restaurantId, User user) throws Exception {
+        Restaurant restaurant = restaurantRepository.findById(restaurantId)
+                .orElseThrow(() -> new Exception("Restaurant was not found"));
+
+        // Kiểm tra người tạo có phải owner của nhà hàng không
+        if (!restaurant.getOwner().getId().equals(user.getId())) {
+            throw new Exception("You do not have permission to create category for this restaurant");
+        }
+
         Category category = new Category();
         category.setName(name);
         category.setRestaurant(restaurant);
 
         return categoryRepository.save(category);
     }
+
 
     @Override
     public List<Category> findCategoryByRestaurantId(Long id) throws Exception {
