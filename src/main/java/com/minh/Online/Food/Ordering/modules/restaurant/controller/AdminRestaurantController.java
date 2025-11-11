@@ -1,8 +1,12 @@
 package com.minh.Online.Food.Ordering.modules.restaurant.controller;
 
+import com.minh.Online.Food.Ordering.modules.restaurant.dto.MyRestaurantResponseDTO;
+import com.minh.Online.Food.Ordering.modules.restaurant.dto.RestaurantResponse;
+import com.minh.Online.Food.Ordering.modules.restaurant.dto.RestaurantStatusUpdateRequest;
 import com.minh.Online.Food.Ordering.modules.restaurant.service.RestaurantService;
 import com.minh.Online.Food.Ordering.modules.restaurant.dto.CreateRestaurantRequest;
 import com.minh.Online.Food.Ordering.modules.restaurant.Restaurant;
+import com.minh.Online.Food.Ordering.modules.restaurant.service.RestaurantServiceImpl;
 import com.minh.Online.Food.Ordering.modules.user.User;
 import com.minh.Online.Food.Ordering.modules.user.UserRepository;
 import com.minh.Online.Food.Ordering.modules.user.dto.MessageResponse;
@@ -26,7 +30,9 @@ public class AdminRestaurantController {
     
     @Autowired
     private UserRepository userRepository;
-    
+    @Autowired
+    private RestaurantServiceImpl restaurantServiceImpl;
+
     private User getAuthenticatedUser(Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated()) {
             throw new RuntimeException("User not authenticated");
@@ -50,7 +56,6 @@ public class AdminRestaurantController {
         @ApiResponse(responseCode = "401", description = "User not authenticated"),
         @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    @SecurityRequirement(name = "bearerAuth")
     @PostMapping()
     public ResponseEntity<?> createRestaurant(
             @Valid @RequestBody CreateRestaurantRequest req,
@@ -128,31 +133,6 @@ public class AdminRestaurantController {
         }
     }
 
-    @Operation(summary = "Update restaurant status", description = "Toggles the active status of a restaurant")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Successfully updated restaurant status"),
-        @ApiResponse(responseCode = "401", description = "User not authenticated"),
-        @ApiResponse(responseCode = "404", description = "Restaurant not found"),
-        @ApiResponse(responseCode = "500", description = "Internal server error")
-    })
-    @SecurityRequirement(name = "bearerAuth")
-    @PutMapping("/{id}/status")
-    public ResponseEntity<?> updateRestaurantStatus(
-            Authentication authentication,
-            @PathVariable Long id) {
-        try {
-            getAuthenticatedUser(authentication);
-            Restaurant restaurant = restaurantService.updateRestaurantStatus(id);
-            return ResponseEntity.ok(restaurant);
-            
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error updating restaurant status: " + e.getMessage());
-        }
-    }
-
     @Operation(summary = "Find restaurant by ID", description = "Retrieves a restaurant by its ID")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved restaurant"),
@@ -176,6 +156,55 @@ public class AdminRestaurantController {
             }
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error finding restaurant: " + e.getMessage());
+        }
+    }
+
+    @Operation(summary = "Get restaurant for authenticated user", description = "Return the restaurant owned by the currently authenticated user, or null if none")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved restaurant (or null)"),
+            @ApiResponse(responseCode = "401", description = "User not authenticated"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @SecurityRequirement(name = "bearerAuth")
+    @GetMapping("/user")
+    public ResponseEntity<?> getRestaurantForUser(Authentication authentication) {
+        try {
+            User user = getAuthenticatedUser(authentication);
+            // restaurantService should return Optional<Restaurant> or null if not present
+            Restaurant restaurant = restaurantService.getRestaurantByUserId(user.getId()); // see service contract below
+            MyRestaurantResponseDTO response = restaurantServiceImpl.toResponse(restaurant);
+
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error fetching user's restaurant: " + e.getMessage());
+        }
+    }
+
+    @Operation(summary = "Update restaurant open/close status")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Status updated and returned updated restaurant"),
+            @ApiResponse(responseCode = "401", description = "Not authenticated"),
+            @ApiResponse(responseCode = "403", description = "Not allowed to modify this restaurant"),
+            @ApiResponse(responseCode = "404", description = "Restaurant not found"),
+            @ApiResponse(responseCode = "500", description = "Internal error")
+    })
+    @SecurityRequirement(name = "bearerAuth")
+    @PutMapping("/{id}/status")
+    public ResponseEntity<?> updateStatus(
+            @PathVariable("id") Long restaurantId
+    ) {
+        try {
+            Restaurant restaurant = restaurantService.updateRestaurantStatus(restaurantId);
+            MyRestaurantResponseDTO response = restaurantServiceImpl.toResponse(restaurant);
+            return ResponseEntity.ok(response);
+
+        } catch (RuntimeException re) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(re.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error updating status: " + e.getMessage());
         }
     }
 }
