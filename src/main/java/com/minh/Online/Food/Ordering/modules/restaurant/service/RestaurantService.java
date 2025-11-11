@@ -26,4 +26,5 @@ public interface RestaurantService {
     public RestaurantDto addToFavorites(Long restaurantId, Long userId) throws Exception;
 
     public Restaurant updateRestaurantStatus(Long restaurantId) throws Exception;
+
 }
