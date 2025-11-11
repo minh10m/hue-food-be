@@ -1,6 +1,7 @@
 package com.minh.Online.Food.Ordering.modules.restaurant.service;
 
 import com.minh.Online.Food.Ordering.modules.address.Address;
+import com.minh.Online.Food.Ordering.modules.restaurant.dto.MyRestaurantResponseDTO;
 import com.minh.Online.Food.Ordering.modules.restaurant.dto.RestaurantResponse;
 import com.minh.Online.Food.Ordering.modules.restaurant.RestaurantRepository;
 import com.minh.Online.Food.Ordering.modules.restaurant.dto.CreateRestaurantRequest;
@@ -10,10 +11,13 @@ import com.minh.Online.Food.Ordering.modules.user.User;
 import com.minh.Online.Food.Ordering.modules.address.AddressRepository;
 import com.minh.Online.Food.Ordering.modules.user.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -148,6 +152,25 @@ public class RestaurantServiceImpl implements RestaurantService {
         restaurant.setOpen(!restaurant.isOpen());
         return restaurantRepository.save(restaurant);
 
-
     }
+
+    public MyRestaurantResponseDTO toResponse(Restaurant r) {
+        if (r == null) return null;
+
+        return MyRestaurantResponseDTO.builder()
+                .id(r.getId())
+                .name(r.getName())
+                .description(r.getDescription())
+                .cuisineType(r.getCuisineType())
+                .address(r.getAddress())
+                .contactInformation(r.getContactInformation())
+                .openingHours(r.getOpeningHours())
+                .image(r.getImage())
+                .registrationDate(r.getRegistrationDate())
+                .open(r.isOpen())
+                .ownerId(r.getOwner() != null ? r.getOwner().getId() : null)
+                .ownerFullName(r.getOwner() != null ? r.getOwner().getFullName() : null)
+                .build();
+    }
+
 }
