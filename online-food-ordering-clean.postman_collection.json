@@ -1,0 +1,1130 @@
+{
+  "info": {
+    "_postman_id": "c1111111-2222-3333-4444-555555555555",
+    "name": "Online Food Ordering - Clean Architecture API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:8080" },
+    { "key": "access_token", "value": "" },
+    { "key": "userId", "value": "1" },
+    { "key": "restaurantId", "value": "1" },
+    { "key": "orderId", "value": "1" },
+    { "key": "addressId", "value": "1" },
+    { "key": "foodId", "value": "1" },
+    { "key": "categoryId", "value": "1" },
+    { "key": "itemId", "value": "1" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Signup (/api/auth/signup)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"123456\",\n  \"fullName\": \"Test User\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/signup",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "signup"]
+            }
+          }
+        },
+        {
+          "name": "Login (/api/auth/login)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"123456\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Refresh access token (/api/auth/refresh)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/auth/refresh?refreshToken={{refreshToken}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "refresh"],
+              "query": [
+                { "key": "refreshToken", "value": "{{refreshToken}}" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Logout by userId (/api/auth/logout/{userId})",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/auth/logout/{{userId}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "logout", "{{userId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Forgot Password",
+      "item": [
+        {
+          "name": "Request OTP (/api/auth/forgot-password)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/forgot-password",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "forgot-password"]
+            }
+          }
+        },
+        {
+          "name": "Verify OTP (/api/auth/forgot-password/verify-otp)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"otp\": \"123456\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/forgot-password/verify-otp",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "forgot-password", "verify-otp"]
+            }
+          }
+        },
+        {
+          "name": "Reset Password (/api/auth/forgot-password/reset-password)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"otp\": \"123456\",\n  \"newPassword\": \"654321\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/forgot-password/reset-password",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "forgot-password", "reset-password"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Get user by id (/api/users/{id})",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/users/{{userId}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "users", "{{userId}}"]
+            }
+          }
+        },
+        {
+          "name": "Update user (/api/users/{id})",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"New Name\",\n  \"avatarUrl\": \"https://...\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/users/{{userId}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "users", "{{userId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Addresses",
+      "item": [
+        {
+          "name": "Create address (/api/users/{userId}/addresses)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}", "type": "text" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"0123456789\",\n  \"street\": \"123 Lê Lợi\",\n  \"city\": \"Hồ Chí Minh\",\n  \"isDefault\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/users/{{userId}}/addresses",
+              "host": ["{{base_url}}"],
+              "path": ["api", "users", "{{userId}}", "addresses"]
+            }
+          }
+        },
+        {
+          "name": "List addresses",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/users/{{userId}}/addresses",
+              "host": ["{{base_url}}"],
+              "path": ["api", "users", "{{userId}}", "addresses"]
+            }
+          }
+        },
+        {
+          "name": "Get address by id",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/users/{{userId}}/addresses/{{addressId}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "users", "{{userId}}", "addresses", "{{addressId}}"]
+            }
+          }
+        },
+        {
+          "name": "Update address",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}", "type": "text" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"0987654321\",\n  \"street\": \"456 Nguyễn Huệ\",\n  \"city\": \"Hồ Chí Minh\",\n  \"isDefault\": false\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/users/{{userId}}/addresses/{{addressId}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "users", "{{userId}}", "addresses", "{{addressId}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete address",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/users/{{userId}}/addresses/{{addressId}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "users", "{{userId}}", "addresses", "{{addressId}}"]
+            }
+          }
+        },
+        {
+          "name": "Set default address",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/users/{{userId}}/addresses/{{addressId}}/default",
+              "host": ["{{base_url}}"],
+              "path": ["api", "users", "{{userId}}", "addresses", "{{addressId}}", "default"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Restaurants - Public",
+      "item": [
+        {
+          "name": "Search restaurants (/api/restaurants)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/restaurants?city=&cuisine=&page=0&size=12",
+              "host": ["{{base_url}}"],
+              "path": ["api", "restaurants"],
+              "query": [
+                { "key": "city", "value": "" },
+                { "key": "cuisine", "value": "" },
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "12" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get restaurant by id (/api/restaurants/{id})",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/restaurants/{{restaurantId}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "restaurants", "{{restaurantId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Restaurants - Admin/Owner",
+      "item": [
+        {
+          "name": "Create restaurant (/api/admin/restaurants)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}", "type": "text" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"My Restaurant\",\n  \"description\": \"Nice food\",\n  \"cuisineType\": \"Vietnamese\",\n  \"imageUrl\": \"https://...\",\n  \"city\": \"Hồ Chí Minh\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/admin/restaurants?ownerId={{userId}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "restaurants"],
+              "query": [
+                { "key": "ownerId", "value": "{{userId}}" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update restaurant",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}", "type": "text" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"My Restaurant Updated\",\n  \"description\": \"New description\",\n  \"cuisineType\": \"Vietnamese\",\n  \"imageUrl\": \"https://...\",\n  \"city\": \"Hồ Chí Minh\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/admin/restaurants/{{restaurantId}}?ownerId={{userId}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "restaurants", "{{restaurantId}}"],
+              "query": [
+                { "key": "ownerId", "value": "{{userId}}" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update restaurant status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/restaurants/{{restaurantId}}/status?ownerId={{userId}}&status=OPEN",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "restaurants", "{{restaurantId}}", "status"],
+              "query": [
+                { "key": "ownerId", "value": "{{userId}}" },
+                { "key": "status", "value": "OPEN" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete restaurant",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/restaurants/{{restaurantId}}?ownerId={{userId}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "restaurants", "{{restaurantId}}"],
+              "query": [
+                { "key": "ownerId", "value": "{{userId}}" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get my restaurant by id",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/restaurants/{{restaurantId}}?ownerId={{userId}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "restaurants", "{{restaurantId}}"],
+              "query": [
+                { "key": "ownerId", "value": "{{userId}}" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "List my restaurants (/api/admin/restaurants/me)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/restaurants/me?ownerId={{userId}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "restaurants", "me"],
+              "query": [
+                { "key": "ownerId", "value": "{{userId}}" }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Foods - Public",
+      "item": [
+        {
+          "name": "Get food by id (/api/foods/{id})",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/foods/{{foodId}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "foods", "{{foodId}}"]
+            }
+          }
+        },
+        {
+          "name": "Search foods (/api/foods)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/foods?restaurantId=&categoryId=&page=0&size=12",
+              "host": ["{{base_url}}"],
+              "path": ["api", "foods"],
+              "query": [
+                { "key": "restaurantId", "value": "" },
+                { "key": "categoryId", "value": "" },
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "12" }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Foods - Admin/Owner",
+      "item": [
+        {
+          "name": "Create food (/api/admin/restaurants/{restaurantId}/foods)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}", "type": "text" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Phở Bò\",\n  \"description\": \"Beef noodle soup\",\n  \"price\": 50000,\n  \"categoryId\": 1,\n  \"vegetarian\": false,\n  \"imageUrl\": \"https://...\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/admin/restaurants/{{restaurantId}}/foods",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "restaurants", "{{restaurantId}}", "foods"]
+            }
+          }
+        },
+        {
+          "name": "Update food",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}", "type": "text" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Phở Gà\",\n  \"description\": \"Chicken noodle soup\",\n  \"price\": 45000,\n  \"categoryId\": 1,\n  \"vegetarian\": false,\n  \"imageUrl\": \"https://...\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/admin/restaurants/{{restaurantId}}/foods/{{foodId}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "restaurants", "{{restaurantId}}", "foods", "{{foodId}}"]
+            }
+          }
+        },
+        {
+          "name": "Update food availability",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/restaurants/{{restaurantId}}/foods/{{foodId}}/availability?availability=AVAILABLE",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "restaurants", "{{restaurantId}}", "foods", "{{foodId}}", "availability"],
+              "query": [
+                { "key": "availability", "value": "AVAILABLE" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get my food by id (admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/restaurants/{{restaurantId}}/foods/{{foodId}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "restaurants", "{{restaurantId}}", "foods", "{{foodId}}"]
+            }
+          }
+        },
+        {
+          "name": "List my foods (admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/restaurants/{{restaurantId}}/foods?categoryId=",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "restaurants", "{{restaurantId}}", "foods"],
+              "query": [
+                { "key": "categoryId", "value": "" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete food",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/restaurants/{{restaurantId}}/foods/{{foodId}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "restaurants", "{{restaurantId}}", "foods", "{{foodId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Categories",
+      "item": [
+        {
+          "name": "Create category (/api/categories)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Món chính\",\n  \"restaurantId\": {{restaurantId}}\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/categories",
+              "host": ["{{base_url}}"],
+              "path": ["api", "categories"]
+            }
+          }
+        },
+        {
+          "name": "Update category",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Món chính updated\",\n  \"restaurantId\": {{restaurantId}}\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/categories/{{categoryId}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "categories", "{{categoryId}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete category",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/categories/{{categoryId}}?restaurantId={{restaurantId}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "categories", "{{categoryId}}"],
+              "query": [
+                { "key": "restaurantId", "value": "{{restaurantId}}" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get category by id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/categories/{{categoryId}}?restaurantId={{restaurantId}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "categories", "{{categoryId}}"],
+              "query": [
+                { "key": "restaurantId", "value": "{{restaurantId}}" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "List categories of restaurant",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/categories?restaurantId={{restaurantId}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "categories"],
+              "query": [
+                { "key": "restaurantId", "value": "{{restaurantId}}" }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Ingredients & Ingredient Categories (Admin)",
+      "item": [
+        {
+          "name": "Create ingredient category",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}", "type": "text" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Topping\",\n  \"description\": \"Extra toppings\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/admin/restaurants/{{restaurantId}}/ingredient-categories",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "restaurants", "{{restaurantId}}", "ingredient-categories"]
+            }
+          }
+        },
+        {
+          "name": "List ingredient categories of restaurant",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/restaurants/{{restaurantId}}/ingredient-categories",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "restaurants", "{{restaurantId}}", "ingredient-categories"]
+            }
+          }
+        },
+        {
+          "name": "Get ingredient category by id",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/restaurants/{{restaurantId}}/ingredient-categories/{{categoryId}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "restaurants", "{{restaurantId}}", "ingredient-categories", "{{categoryId}}"]
+            }
+          }
+        },
+        {
+          "name": "Update ingredient category",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}", "type": "text" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Topping updated\",\n  \"description\": \"updated\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/admin/restaurants/{{restaurantId}}/ingredient-categories/{{categoryId}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "restaurants", "{{restaurantId}}", "ingredient-categories", "{{categoryId}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete ingredient category",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/restaurants/{{restaurantId}}/ingredient-categories/{{categoryId}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "restaurants", "{{restaurantId}}", "ingredient-categories", "{{categoryId}}"]
+            }
+          }
+        },
+        {
+          "name": "Create ingredient item",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}", "type": "text" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Thêm trứng\",\n  \"price\": 10000,\n  \"categoryId\": {{categoryId}}\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/admin/restaurants/{{restaurantId}}/ingredients",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "restaurants", "{{restaurantId}}", "ingredients"]
+            }
+          }
+        },
+        {
+          "name": "List ingredient items (optionally by categoryId)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/restaurants/{{restaurantId}}/ingredients?categoryId=",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "restaurants", "{{restaurantId}}", "ingredients"],
+              "query": [
+                { "key": "categoryId", "value": "" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get ingredient item by id",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/restaurants/{{restaurantId}}/ingredients/{{itemId}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "restaurants", "{{restaurantId}}", "ingredients", "{{itemId}}"]
+            }
+          }
+        },
+        {
+          "name": "Update ingredient item",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}", "type": "text" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Thêm phô mai\",\n  \"price\": 12000,\n  \"categoryId\": {{categoryId}}\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/admin/restaurants/{{restaurantId}}/ingredients/{{itemId}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "restaurants", "{{restaurantId}}", "ingredients", "{{itemId}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete ingredient item",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/restaurants/{{restaurantId}}/ingredients/{{itemId}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "restaurants", "{{restaurantId}}", "ingredients", "{{itemId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Events (public)",
+      "item": [
+        {
+          "name": "Get event by id (/api/events/{id})",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/events/{{eventId}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "events", "{{eventId}}"]
+            }
+          }
+        },
+        {
+          "name": "Upcoming events (/api/events/upcoming)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/events/upcoming?fromEpoch=&page=0&size=12",
+              "host": ["{{base_url}}"],
+              "path": ["api", "events", "upcoming"],
+              "query": [
+                { "key": "fromEpoch", "value": "" },
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "12" }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cart",
+      "item": [
+        {
+          "name": "Get my cart (/api/cart)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/cart",
+              "host": ["{{base_url}}"],
+              "path": ["api", "cart"]
+            }
+          }
+        },
+        {
+          "name": "Add item to cart",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}", "type": "text" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"foodId\": {{foodId}},\n  \"foodName\": \"Phở Bò\",\n  \"unitPrice\": 50000,\n  \"quantity\": 2,\n  \"restaurantId\": {{restaurantId}}\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/cart/items",
+              "host": ["{{base_url}}"],
+              "path": ["api", "cart", "items"]
+            }
+          }
+        },
+        {
+          "name": "Update cart item quantity",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}", "type": "text" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"quantity\": 3\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/cart/items/{{itemId}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "cart", "items", "{{itemId}}"]
+            }
+          }
+        },
+        {
+          "name": "Remove item from cart",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/cart/items/{{itemId}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "cart", "items", "{{itemId}}"]
+            }
+          }
+        },
+        {
+          "name": "Clear cart",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/cart/items",
+              "host": ["{{base_url}}"],
+              "path": ["api", "cart", "items"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Orders - User",
+      "item": [
+        {
+          "name": "Create order (/api/orders)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}", "type": "text" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"addressId\": {{addressId}},\n  \"paymentMethod\": \"CASH_ON_DELIVERY\",\n  \"note\": \"Giao giờ nghỉ trưa\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/orders",
+              "host": ["{{base_url}}"],
+              "path": ["api", "orders"]
+            }
+          }
+        },
+        {
+          "name": "Get my order by id",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/orders/{{orderId}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "orders", "{{orderId}}"]
+            }
+          }
+        },
+        {
+          "name": "List my orders",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/orders?page=0&size=20",
+              "host": ["{{base_url}}"],
+              "path": ["api", "orders"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "20" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Cancel my order",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/orders/{{orderId}}/cancel?reason=Change%20of%20plans",
+              "host": ["{{base_url}}"],
+              "path": ["api", "orders", "{{orderId}}", "cancel"],
+              "query": [
+                { "key": "reason", "value": "Change of plans" }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Orders - Admin/Restaurant",
+      "item": [
+        {
+          "name": "Update order status (/api/admin/restaurants/{restaurantId}/orders/{orderId}/status)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/restaurants/{{restaurantId}}/orders/{{orderId}}/status?status=CONFIRMED",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "restaurants", "{{restaurantId}}", "orders", "{{orderId}}", "status"],
+              "query": [
+                { "key": "status", "value": "CONFIRMED" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get order for restaurant",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/restaurants/{{restaurantId}}/orders/{{orderId}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "restaurants", "{{restaurantId}}", "orders", "{{orderId}}"]
+            }
+          }
+        },
+        {
+          "name": "List restaurant orders",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/restaurants/{{restaurantId}}/orders?page=0&size=50&fromEpoch=&toEpoch=",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "restaurants", "{{restaurantId}}", "orders"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "50" },
+                { "key": "fromEpoch", "value": "" },
+                { "key": "toEpoch", "value": "" }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Favorite Restaurants",
+      "item": [
+        {
+          "name": "Add favorite restaurant (/api/user/favorites/restaurants)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}", "type": "text" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"restaurantId\": {{restaurantId}}\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/user/favorites/restaurants",
+              "host": ["{{base_url}}"],
+              "path": ["api", "user", "favorites", "restaurants"]
+            }
+          }
+        },
+        {
+          "name": "Remove favorite restaurant",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/user/favorites/restaurants/{{restaurantId}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "user", "favorites", "restaurants", "{{restaurantId}}"]
+            }
+          }
+        },
+        {
+          "name": "List my favorite restaurant ids",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/user/favorites/restaurants",
+              "host": ["{{base_url}}"],
+              "path": ["api", "user", "favorites", "restaurants"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
