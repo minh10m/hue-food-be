@@ -1,7 +1,5 @@
 package com.minh.Online.Food.Ordering.adapters.web.dto;
 
-import lombok.Data;
-
 public class MessageResponse {
     private String message;
 

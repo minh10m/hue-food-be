@@ -4,18 +4,18 @@ package com.minh.Online.Food.Ordering.application.service;
 import com.minh.Online.Food.Ordering.domain.model.UserAccount;
 import com.minh.Online.Food.Ordering.domain.model.UserRole;
 import com.minh.Online.Food.Ordering.domain.ports.in.user.GetUserProfileUseCase;
+import com.minh.Online.Food.Ordering.domain.ports.in.user.RegisterUserUseCase;
 import com.minh.Online.Food.Ordering.domain.ports.in.user.UpdateUserProfileUseCase;
 import com.minh.Online.Food.Ordering.domain.ports.out.PasswordHasherPort;
 import com.minh.Online.Food.Ordering.domain.ports.out.UserRepositoryPort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Service
 public class UserUseCaseService implements
-       GetUserProfileUseCase, UpdateUserProfileUseCase {
+       GetUserProfileUseCase, UpdateUserProfileUseCase, RegisterUserUseCase {
 
     private final UserRepositoryPort users;
     private final PasswordHasherPort hasher;
@@ -24,6 +24,15 @@ public class UserUseCaseService implements
         this.users = users; this.hasher = hasher;
     }
 
+    @Override
+    @Transactional
+    public UserAccount register(String email, String rawPassword, String fullName) {
+        if (email == null || rawPassword == null) throw new IllegalArgumentException("Email & password required");
+        if (users.existsByEmail(email)) throw new IllegalArgumentException("Email already registered");
+        String hash = hasher.hash(rawPassword);
+        UserAccount toSave = new UserAccount(null, email, hash, fullName, null, UserRole.CUSTOMER, true);
+        return users.save(toSave);
+    }
 
     @Override public Optional<UserAccount> getById(Long id) { return users.findById(id); }
     @Override public Optional<UserAccount> getByEmail(String email) { return users.findByEmail(email); }
@@ -41,5 +50,6 @@ public class UserUseCaseService implements
             return users.save(merged);
         });
     }
+
 }
 

@@ -1,6 +1,7 @@
 package com.minh.Online.Food.Ordering.application.service;
 
 import com.minh.Online.Food.Ordering.domain.model.Restaurant;
+import com.minh.Online.Food.Ordering.domain.model.RestaurantStatus;
 import com.minh.Online.Food.Ordering.domain.ports.in.restaurant.*;
 import com.minh.Online.Food.Ordering.domain.ports.out.RestaurantRepositoryPort;
 import org.springframework.stereotype.Service;
@@ -27,7 +28,7 @@ public class RestaurantUseCaseService implements
         Restaurant toSave = new Restaurant(null, r.ownerId(), r.name(), r.description(), r.cuisineType(),
                 r.street(), r.city(), r.email(), r.mobile(), r.twitter(), r.instagram(),
                 r.openingHours(), r.image(),
-                r.status() != null ? r.status() : Restaurant.Status.CLOSED,
+                r.status() != null ? r.status() : RestaurantStatus.CLOSED,
                 now, now);
         return repo.save(toSave);
     }
@@ -40,7 +41,7 @@ public class RestaurantUseCaseService implements
     }
 
     @Override @Transactional
-    public Restaurant updateStatus(Long ownerId, Long restaurantId, Restaurant.Status status) {
+    public Restaurant updateStatus(Long ownerId, Long restaurantId, RestaurantStatus status) {
         var now = Instant.now();
         var r = repo.findByIdAndOwnerId(restaurantId, ownerId)
                 .orElseThrow(() -> new NoSuchElementException("Restaurant not found"));

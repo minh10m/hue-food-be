@@ -2,6 +2,7 @@ package com.minh.Online.Food.Ordering.adapters.persistence.restaurant;
 
 import com.minh.Online.Food.Ordering.adapters.persistence.user.UserJpaEntity;
 import com.minh.Online.Food.Ordering.domain.model.Restaurant;
+import com.minh.Online.Food.Ordering.domain.model.RestaurantStatus;
 import com.minh.Online.Food.Ordering.domain.ports.out.RestaurantRepositoryPort;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
@@ -57,7 +58,7 @@ public class RestaurantRepositoryAdapter implements RestaurantRepositoryPort {
                 e.getStreet(), e.getCity(),
                 e.getEmail(), e.getMobile(), e.getTwitter(), e.getInstagram(),
                 e.getOpeningHours(), e.getImage(),
-                e.getStatus() == RestaurantJpaEntity.Status.OPEN ? Restaurant.Status.OPEN : Restaurant.Status.CLOSED,
+                e.getStatus(),
                 e.getCreatedAt(), e.getUpdatedAt()
         );
     }
@@ -70,7 +71,7 @@ public class RestaurantRepositoryAdapter implements RestaurantRepositoryPort {
                 .street(r.street()).city(r.city())
                 .email(r.email()).mobile(r.mobile()).twitter(r.twitter()).instagram(r.instagram())
                 .openingHours(r.openingHours()).image(r.image())
-                .status(r.status() == Restaurant.Status.OPEN ? RestaurantJpaEntity.Status.OPEN : RestaurantJpaEntity.Status.CLOSED)
+                .status(r.status())
                 .createdAt(r.createdAt()).updatedAt(r.updatedAt())
                 .build();
     }

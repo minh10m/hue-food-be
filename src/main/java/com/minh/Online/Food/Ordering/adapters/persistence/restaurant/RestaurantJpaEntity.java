@@ -1,6 +1,7 @@
 package com.minh.Online.Food.Ordering.adapters.persistence.restaurant;
 
 import com.minh.Online.Food.Ordering.adapters.persistence.user.UserJpaEntity;
+import com.minh.Online.Food.Ordering.domain.model.RestaurantStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -23,7 +24,6 @@ public class RestaurantJpaEntity {
     private String street;
     private String city;
 
-    // liên hệ
     private String email;
     private String mobile;
     private String twitter;
@@ -32,12 +32,12 @@ public class RestaurantJpaEntity {
     private String openingHours;
     private String image;
 
-    @Enumerated(EnumType.STRING) @Column(nullable=false)
-    private Status status;
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private RestaurantStatus status;
 
     @Column(nullable=false) private Instant createdAt;
     @Column(nullable=false) private Instant updatedAt;
 
-    public enum Status { OPEN, CLOSED }
 }
 

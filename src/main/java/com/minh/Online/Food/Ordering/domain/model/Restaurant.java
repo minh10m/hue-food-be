@@ -4,10 +4,8 @@ import java.time.Instant;
 import java.util.Objects;
 
 public final class Restaurant {
-    public enum Status { OPEN, CLOSED }
-
     private final Long id;
-    private final Long ownerId;        // User.id của chủ quán
+    private final Long ownerId;
     private final String name;
     private final String description;
     private final String cuisineType;
@@ -19,14 +17,14 @@ public final class Restaurant {
     private final String instagram;
     private final String openingHours;
     private final String image;
-    private final Status status;
+    private final RestaurantStatus status;
     private final Instant createdAt;
     private final Instant updatedAt;
 
     public Restaurant(Long id, Long ownerId, String name, String description, String cuisineType,
                       String street, String city,
                       String email, String mobile, String twitter, String instagram,
-                      String openingHours, String image, Status status,
+                      String openingHours, String image, RestaurantStatus status,
                       Instant createdAt, Instant updatedAt) {
         this.id = id; this.ownerId = ownerId; this.name = name; this.description = description; this.cuisineType = cuisineType;
         this.street = street; this.city = city;
@@ -49,7 +47,7 @@ public final class Restaurant {
     public String instagram() { return instagram; }
     public String openingHours() { return openingHours; }
     public String image() { return image; }
-    public Status status() { return status; }
+    public RestaurantStatus status() { return status; }
     public Instant createdAt() { return createdAt; }
     public Instant updatedAt() { return updatedAt; }
 
@@ -57,7 +55,7 @@ public final class Restaurant {
     public Restaurant withId(Long newId) {
         return new Restaurant(newId, ownerId, name, description, cuisineType, street, city, email, mobile, twitter, instagram, openingHours, image, status, createdAt, updatedAt);
     }
-    public Restaurant withStatus(Status s, Instant now) {
+    public Restaurant withStatus(RestaurantStatus s, Instant now) {
         return new Restaurant(id, ownerId, name, description, cuisineType, street, city, email, mobile, twitter, instagram, openingHours, image, s, createdAt, now);
     }
     public Restaurant merge(Restaurant patch, Instant now) {
