@@ -22,7 +22,6 @@ public class ForgotPasswordController {
     private final VerifyOtpUseCase verifyUseCase;
     private final ResetPasswordUseCase resetUseCase;
 
-    // 1. Gửi OTP
     @PostMapping
     public ResponseEntity<?> requestOtp(@Valid @RequestBody ForgotPasswordRequest req,
                                         HttpServletRequest http) {
@@ -33,7 +32,6 @@ public class ForgotPasswordController {
         return ResponseEntity.ok().build();
     }
 
-    // 2. Verify OTP
     @PostMapping("/verify-otp")
     public ResponseEntity<?> verifyOtp(@Valid @RequestBody VerifyOtpRequest req) {
         String email = ForgotPasswordWebMapper.email(req);
@@ -42,7 +40,6 @@ public class ForgotPasswordController {
         return ResponseEntity.ok().build();
     }
 
-    // 3. Reset password
     @PostMapping("/reset-password")
     public ResponseEntity<?> resetPassword(@Valid @RequestBody ResetPasswordRequest req) {
         String email = ForgotPasswordWebMapper.email(req);

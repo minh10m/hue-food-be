@@ -1,11 +1,11 @@
 package com.minh.Online.Food.Ordering.adapters.web;
 
-
 import com.minh.Online.Food.Ordering.adapters.web.dto.LoginRequest;
 import com.minh.Online.Food.Ordering.domain.ports.in.token.IssueTokensUseCase;
 import com.minh.Online.Food.Ordering.domain.ports.in.token.RefreshAccessTokenUseCase;
 import com.minh.Online.Food.Ordering.domain.ports.in.token.RevokeTokensUseCase;
 import com.minh.Online.Food.Ordering.domain.ports.in.user.GetUserProfileUseCase;
+import com.minh.Online.Food.Ordering.domain.ports.in.user.RegisterUserUseCase;
 import com.minh.Online.Food.Ordering.domain.ports.out.PasswordHasherPort;
 import com.minh.Online.Food.Ordering.adapters.web.dto.AuthenticationResponse;
 import com.minh.Online.Food.Ordering.adapters.web.dto.SignupRequest;
@@ -21,12 +21,11 @@ public class AuthenticationController {
 
     private final RegisterUserUseCase registerUC;
     private final GetUserProfileUseCase getUserUC;
-    private final PasswordHasherPort passwordHasher; // để verify login (matches)
+    private final PasswordHasherPort passwordHasher;
     private final IssueTokensUseCase issueTokensUC;
     private final RefreshAccessTokenUseCase refreshUC;
     private final RevokeTokensUseCase revokeUC;
 
-    // --- SIGNUP ---
     @PostMapping("/signup")
     public ResponseEntity<AuthenticationResponse> signup(@Valid @RequestBody SignupRequest req) {
         // 1) Tạo user (hash pass trong use-case register)
@@ -38,7 +37,6 @@ public class AuthenticationController {
                 .body(new AuthenticationResponse(tokens.accessToken(), tokens.refreshToken()));
     }
 
-    // --- LOGIN ---
     @PostMapping("/login")
     public ResponseEntity<AuthenticationResponse> login(@Valid @RequestBody LoginRequest req) {
         var userOpt = getUserUC.getByEmail(req.getEmail());
@@ -53,14 +51,12 @@ public class AuthenticationController {
         return ResponseEntity.ok(new AuthenticationResponse(tokens.accessToken(), tokens.refreshToken()));
     }
 
-    // --- REFRESH ACCESS TOKEN ---
     @PostMapping("/refresh")
     public ResponseEntity<AuthenticationResponse> refresh(@RequestParam("refreshToken") String refreshToken) {
         String newAccess = refreshUC.refresh(refreshToken);
         return ResponseEntity.ok(new AuthenticationResponse(newAccess, refreshToken));
     }
 
-    // --- LOGOUT (revoke tất cả token của user) ---
     @PostMapping("/logout/{userId}")
     public ResponseEntity<Void> logout(@PathVariable Long userId) {
         revokeUC.revokeAll(userId);

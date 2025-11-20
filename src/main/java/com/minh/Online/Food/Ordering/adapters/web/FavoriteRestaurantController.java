@@ -1,5 +1,6 @@
 package com.minh.Online.Food.Ordering.adapters.web;
 
+import com.minh.Online.Food.Ordering.adapters.security.AuthUtils;
 import com.minh.Online.Food.Ordering.adapters.web.dto.AddFavoriteRestaurantRequest;
 import com.minh.Online.Food.Ordering.adapters.web.mapper.FavoriteRestaurantWebMapper;
 import com.minh.Online.Food.Ordering.domain.ports.in.favorite.AddFavoriteRestaurantUseCase;
@@ -8,6 +9,7 @@ import com.minh.Online.Food.Ordering.domain.ports.in.favorite.RemoveFavoriteRest
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 // Bạn chỉnh lại path cho hợp FE: /api/user/favorites/restaurants chẳng hạn
@@ -20,12 +22,14 @@ public class FavoriteRestaurantController {
     private final RemoveFavoriteRestaurantUseCase removeUseCase;
     private final GetUserFavoriteRestaurantsUseCase getUseCase;
 
+    private final AuthUtils auth;
+
     @PostMapping
     public ResponseEntity<?> addFavorite(
+            Authentication authentication,
             @Valid @RequestBody AddFavoriteRestaurantRequest req
-            /*, @AuthenticationPrincipal CustomUserPrincipal principal */
     ) {
-        Long userId = getCurrentUserId(); // TODO: lấy từ SecurityContext/JWT của bạn
+        Long userId = auth.currentUserId(authentication);
         Long restaurantId = FavoriteRestaurantWebMapper.toRestaurantId(req);
         addUseCase.addFavorite(userId, restaurantId);
         return ResponseEntity.ok().build();
@@ -33,24 +37,20 @@ public class FavoriteRestaurantController {
 
     @DeleteMapping("/{restaurantId}")
     public ResponseEntity<?> removeFavorite(
+            Authentication authentication,
             @PathVariable Long restaurantId
-            /*, @AuthenticationPrincipal CustomUserPrincipal principal */
     ) {
-        Long userId = getCurrentUserId();
+        Long userId = auth.currentUserId(authentication);
         removeUseCase.removeFavorite(userId, restaurantId);
         return ResponseEntity.ok().build();
     }
 
     @GetMapping
     public ResponseEntity<?> getUserFavoriteRestaurants(
-            /* @AuthenticationPrincipal CustomUserPrincipal principal */
+            Authentication authentication
     ) {
-        Long userId = getCurrentUserId();
+        Long userId = auth.currentUserId(authentication);
         return ResponseEntity.ok(getUseCase.getFavoriteRestaurantIds(userId));
-    }
-
-    private Long getCurrentUserId() {
-        throw new UnsupportedOperationException("TODO: implement getCurrentUserId()");
     }
 }
 

@@ -17,7 +17,7 @@ public interface SpringDataRestaurantRepository extends JpaRepository<Restaurant
 
     @Query("""
            select r from RestaurantJpaEntity r
-           where r.status = com.minh.Online.Food.Ordering.adapters.persistence.restaurant.RestaurantJpaEntity$Status.OPEN
+           where r.status = com.minh.Online.Food.Ordering.domain.model.RestaurantStatus.OPEN
              and (:city is null or lower(r.city) = lower(:city))
              and (:cuisine is null or lower(r.cuisineType) = lower(:cuisine))
            """)

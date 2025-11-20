@@ -3,7 +3,7 @@ package com.minh.Online.Food.Ordering.adapters.web;
 import com.minh.Online.Food.Ordering.adapters.web.dto.CreateRestaurantRequest;
 import com.minh.Online.Food.Ordering.adapters.web.dto.MyRestaurantResponseDTO;
 import com.minh.Online.Food.Ordering.adapters.web.mapper.RestaurantWebMapper;
-import com.minh.Online.Food.Ordering.domain.model.Restaurant;
+import com.minh.Online.Food.Ordering.domain.model.RestaurantStatus;
 import com.minh.Online.Food.Ordering.domain.ports.in.restaurant.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -47,7 +47,7 @@ public class AdminRestaurantController {
     @PatchMapping("/{id}/status")
     public ResponseEntity<MyRestaurantResponseDTO> updateStatus(@RequestParam Long ownerId,
                                                                 @PathVariable Long id,
-                                                                @RequestParam Restaurant.Status status){
+                                                                @RequestParam RestaurantStatus status){
         var saved = statusUC.updateStatus(ownerId, id, status);
         return ResponseEntity.ok(RestaurantWebMapper.toMine(saved));
     }

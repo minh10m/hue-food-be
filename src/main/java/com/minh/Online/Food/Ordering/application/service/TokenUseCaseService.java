@@ -25,7 +25,6 @@ public class TokenUseCaseService implements IssueTokensUseCase, RefreshAccessTok
     @Transactional
     public Result issue(Long userId, String email, String role) {
         Instant now = Instant.now();
-        // revoke cũ nếu muốn 1 session duy nhất
         store.revokeAllForUser(userId);
 
         String access = jwt.generateAccessToken(userId, email, role, now);

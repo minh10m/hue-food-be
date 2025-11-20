@@ -1,7 +1,7 @@
 package com.minh.Online.Food.Ordering.config;
 
-import com.minh.Online.Food.Ordering.modules.user.service.CustomerUserDetailsService;
-import jakarta.servlet.http.HttpServletResponse;
+import com.minh.Online.Food.Ordering.adapters.security.CustomerUserDetailsService;
+import com.minh.Online.Food.Ordering.adapters.security.JwtAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,7 +14,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -32,17 +31,15 @@ public class SecurityConfig {
 
     private final CustomerUserDetailsService userDetailsServiceImp;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
-    private final CustomLogoutHandler logoutHandler;
-    
+
     @Value("${frontend.url}")
     private String frontendUrl;
 
     public SecurityConfig(CustomerUserDetailsService userDetailsServiceImp,
-                          JwtAuthenticationFilter jwtAuthenticationFilter,
-                          CustomLogoutHandler logoutHandler) {
+                          JwtAuthenticationFilter jwtAuthenticationFilter
+                          ) {
         this.userDetailsServiceImp = userDetailsServiceImp;
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
-        this.logoutHandler = logoutHandler;
     }
 
     @Bean
@@ -73,16 +70,7 @@ public class SecurityConfig {
                         .accessDeniedHandler((req1, res, ex) -> res.setStatus(403))
                         .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
                 )
-                .logout(l -> l
-                        .logoutUrl("/logout")
-                        .addLogoutHandler(logoutHandler)
-                        .logoutSuccessHandler((request, response, authentication) -> {
-                            SecurityContextHolder.clearContext();
-                            response.setContentType("application/json");
-                            response.setStatus(HttpServletResponse.SC_OK);
-                            response.getWriter().write("{\"message\": \"Logout successful\"}");
-                        })
-                )
+                .logout(logout -> logout.disable())
                 .build();
     }
 

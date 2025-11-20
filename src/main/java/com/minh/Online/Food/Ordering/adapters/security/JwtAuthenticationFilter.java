@@ -1,38 +1,31 @@
-package com.minh.Online.Food.Ordering.config;
+package com.minh.Online.Food.Ordering.adapters.security;
 
-import com.minh.Online.Food.Ordering.modules.token.JwtService;
-import com.minh.Online.Food.Ordering.modules.user.service.CustomerUserDetailsService;
 import io.micrometer.common.lang.NonNull;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.List;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private final JwtService jwtService;
-    private final CustomerUserDetailsService userDetailsService;
-
+    private final JwtServiceAdapter jwtService;
     private static final AntPathMatcher ANT = new AntPathMatcher();
 
-    public JwtAuthenticationFilter(JwtService jwtService, CustomerUserDetailsService userDetailsService) {
+    public JwtAuthenticationFilter(JwtServiceAdapter jwtService) {
         this.jwtService = jwtService;
-        this.userDetailsService = userDetailsService;
     }
 
-    /** Public (no-auth) endpoints.
-     *  NOTE: do NOT put /api/restaurants/** here. Only GET is public (handled in SecurityConfig).
-     */
     private boolean isPublicPath(String path) {
         return ANT.match("/v3/api-docs/**", path)
                 || ANT.match("/swagger-ui/**", path)
@@ -40,16 +33,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 || ANT.match("/swagger-resources/**", path)
                 || ANT.match("/configuration/**", path)
                 || ANT.match("/webjars/**", path)
-                || ANT.match("/login/**", path)
-                || ANT.match("/register/**", path)
-                || ANT.match("/refresh_token/**", path)
-                || ANT.match("/forgot-password/**", path)
+                || ANT.match("/api/auth/**", path)
                 || ANT.match("/error", path)
                 || ANT.match("/actuator/**", path)
                 || ANT.match("/public/**", path);
     }
 
-    /** Skip filtering for public paths and CORS preflight. */
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         return "OPTIONS".equalsIgnoreCase(request.getMethod())
@@ -62,37 +51,40 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             @NonNull HttpServletResponse response,
             @NonNull FilterChain filterChain)
             throws ServletException, IOException {
-
-        // Only handle if no auth yet and we have a Bearer token
         if (SecurityContextHolder.getContext().getAuthentication() == null) {
             String authHeader = request.getHeader("Authorization");
+
             if (authHeader != null && authHeader.startsWith("Bearer ")) {
                 String token = authHeader.substring(7);
-                String email = null;
-                try {
-                    email = jwtService.extractEmail(token);
-                } catch (Exception ignored) {
-                    // optionally log invalid token format/claims
-                }
 
-                if (email != null) {
-                    try {
-                        UserDetails userDetails = userDetailsService.loadUserByUsername(email);
-                        if (jwtService.isValid(token, userDetails)) {
+                try {
+                    if (jwtService.isValid(token)) {
+                        String email = jwtService.extractEmail(token);
+                        Long userId = jwtService.extractUserId(token);
+                        String role = jwtService.extractRole(token);
+
+                        if (email != null && userId != null) {
+                            AuthPrincipal principal = new AuthPrincipal(userId, email, role);
+
+                            var authorities = (role != null)
+                                    ? List.of(new SimpleGrantedAuthority("ROLE_" + role))
+                                    : List.<SimpleGrantedAuthority>of();
+
                             UsernamePasswordAuthenticationToken authToken =
                                     new UsernamePasswordAuthenticationToken(
-                                            userDetails, null, userDetails.getAuthorities());
-                            authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                                            principal, null, authorities);
+
+                            authToken.setDetails(
+                                    new WebAuthenticationDetailsSource().buildDetails(request));
+
                             SecurityContextHolder.getContext().setAuthentication(authToken);
                         }
-                    } catch (Exception ignored) {
-                        // optionally log loadUserByUsername errors
                     }
+                } catch (Exception ignored) {
                 }
             }
         }
 
         filterChain.doFilter(request, response);
-        // Do not clear the context here.
     }
 }

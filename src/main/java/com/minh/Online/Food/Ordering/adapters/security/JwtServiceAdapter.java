@@ -56,6 +56,30 @@ public class JwtServiceAdapter implements TokenGeneratorPort {
         catch (JwtException | IllegalArgumentException e) { return false; }
     }
 
+    public String extractEmail(String token) {
+        return parseClaims(token).getSubject();
+    }
+
+    public Long extractUserId(String token) {
+        Claims claims = parseClaims(token);
+        Object uid = claims.get("uid");
+        if (uid instanceof Number n) {
+            return n.longValue();
+        }
+        if (uid instanceof String s) {
+            try {
+                return Long.parseLong(s);
+            } catch (NumberFormatException ignored) {}
+        }
+        return null;
+    }
+
+    public String extractRole(String token) {
+        Claims claims = parseClaims(token);
+        Object role = claims.get("role");
+        return role != null ? role.toString() : null;
+    }
+
     @Override
     public Map<String, Object> claims(String token) {
         var c = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
@@ -66,6 +90,14 @@ public class JwtServiceAdapter implements TokenGeneratorPort {
     public java.time.Instant expiresAt(String token) {
         var c = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
         return c.getExpiration().toInstant();
+    }
+
+    private Claims parseClaims(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
     }
 }
 
