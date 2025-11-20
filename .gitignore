@@ -33,5 +33,3 @@ build/
 .vscode/
 
 .env
-# Ignore environment properties file
-env.properties
